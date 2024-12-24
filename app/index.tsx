@@ -1,6 +1,3 @@
-import { drizzle } from 'drizzle-orm/expo-sqlite';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import * as SQLite from 'expo-sqlite';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -20,19 +17,16 @@ import { Progress } from '@/components/ui/progress';
 import { Text } from '@/components/ui/text';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-import migrations from '@/db/migrations/migrations';
+import { getDB } from '@/db/client';
 import { usersTable } from '@/db/schema';
 import { Info } from '@/lib/icons/Info';
-
-const expo = SQLite.openDatabaseSync('db.db');
-const db = drizzle(expo);
 
 const GITHUB_AVATAR_URI =
 	'https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg';
 
 export default function Screen() {
+	const db = getDB();
 	const [progress, setProgress] = React.useState(78);
-	const { success, error } = useMigrations(db, migrations);
 	const [items, setItems] = useState<(typeof usersTable.$inferSelect)[] | null>(null);
 
 	function updateProgressValue() {
@@ -40,7 +34,6 @@ export default function Screen() {
 	}
 
 	useEffect(() => {
-		if (!success) return;
 		(async () => {
 			await db.delete(usersTable);
 			await db.insert(usersTable).values([
@@ -53,23 +46,7 @@ export default function Screen() {
 			const users = await db.select().from(usersTable);
 			setItems(users);
 		})();
-	}, [success]);
-
-	if (error) {
-		return (
-			<View>
-				<Text>Migration error: {error.message}</Text>
-			</View>
-		);
-	}
-
-	if (!success) {
-		return (
-			<View>
-				<Text>Migration is in progress...</Text>
-			</View>
-		);
-	}
+	}, [db]);
 
 	if (items === null || items.length === 0) {
 		return (
