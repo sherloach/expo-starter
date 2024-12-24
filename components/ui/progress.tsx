@@ -47,7 +47,7 @@ function Indicator({ value, className }: { value: number | undefined | null; cla
 			<View
 				className={cn('h-full w-full flex-1 bg-primary web:transition-all', className)}
 				style={{ transform: `translateX(-${100 - (value ?? 0)}%)` }}>
-				<ProgressPrimitive.Indicator className={cn('h-full w-full ', className)} />
+				<ProgressPrimitive.Indicator className={cn('h-full w-full', className)} />
 			</View>
 		);
 	}
